@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>社保与个税合规检查 — 宇守信咨询</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#f0f2f5; color:#2d3436; padding-bottom:60px; }
+.header { background:linear-gradient(135deg,#92400e,#d97706); color:white; padding:32px 20px 24px; text-align:center; }
+.header h1 { font-size:22px; font-weight:700; margin-bottom:6px; }
+.header p { font-size:13px; opacity:0.85; }
+.header .badge { display:inline-block; background:rgba(255,255,255,0.2); border-radius:20px; padding:4px 14px; font-size:11px; margin-top:8px; }
+.tabs { display:flex; background:white; box-shadow:0 1px 4px rgba(0,0,0,0.08); position:sticky; top:0; z-index:10; }
+.tab { flex:1; text-align:center; padding:14px 0; font-size:14px; font-weight:500; color:#888; cursor:pointer; border-bottom:3px solid transparent; transition:all .2s; }
+.tab.active { color:#b45309; border-bottom-color:#b45309; }
+.panel { display:none; padding:16px; }
+.panel.active { display:block; }
+.card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:12px; }
+.card-title { background:#f0f4ff; padding:10px 16px; font-size:13px; font-weight:600; color:#b45309; border-bottom:1px solid #e0e7ff; }
+.form-row { padding:10px 16px; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.form-row label { font-size:13px; color:#444; min-width:150px; flex-shrink:0; }
+.form-row input,.form-row select { padding:8px 12px; border:1px solid #e0e0e0; border-radius:8px; font-size:13px; flex:1; min-width:80px; max-width:200px; background:#fff8e1; line-height:44px; height:44px; }
+.form-row input:focus,.form-row select:focus { outline:none; border-color:#3b82f6; }
+.form-row .unit { font-size:12px; color:#888; }
+.yesno { display:flex; gap:8px; }
+.yesno span { padding:4px 16px; border-radius:16px; font-size:13px; cursor:pointer; border:1px solid #ddd; color:#666; }
+.yesno span.sel-yes { background:linear-gradient(135deg,#92400e,#d97706); color:white; border-color:#3b82f6; }
+.yesno span.sel-no { background:#e8ecf1; color:#999; border-color:#ddd; }
+.fixed-bottom { position:sticky; bottom:0; background:white; padding:12px 16px; display:flex; gap:10px; box-shadow:0 -2px 8px rgba(0,0,0,0.06); z-index:10; }
+.fixed-bottom button { flex:1; padding:12px; border-radius:10px; font-size:14px; font-weight:600; border:none; cursor:pointer; }
+.btn-primary { background:linear-gradient(135deg,#92400e,#d97706); color:white; }
+.btn-primary:hover { opacity:0.9; }
+.btn-secondary { background:#e8ecf1; color:#555; }
+
+.score-card { background:linear-gradient(135deg,#92400e,#d97706); color:white; border-radius:16px; padding:28px 20px; text-align:center; margin-bottom:16px; }
+.score-card .label { font-size:13px; opacity:0.85; }
+.score-card .score { font-size:40px; font-weight:800; margin:6px 0; }
+.score-card .grade { font-size:16px; font-weight:600; margin-bottom:4px; }
+.score-card .suggestion { font-size:13px; opacity:0.9; line-height:1.6; }
+.result-summary { background:linear-gradient(135deg,#92400e,#d97706); color:white; border-radius:16px; padding:28px 20px; text-align:center; margin-bottom:16px; }
+.result-summary .row { display:flex; justify-content:space-around; margin-top:12px; flex-wrap:wrap; gap:8px; }
+.result-summary .item { flex:1; min-width:100px; }
+.result-summary .item .label { font-size:11px; opacity:0.85; }
+.result-summary .item .val { font-size:22px; font-weight:800; margin:4px 0; }
+.result-summary .item .sub { font-size:12px; opacity:0.85; }
+
+.dim-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+.dim-card { background:white; border-radius:12px; padding:16px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.dim-card .name { font-size:12px; color:#888; margin-bottom:4px; }
+.dim-card .dscore { font-size:20px; font-weight:700; }
+.dim-card .dstatus { font-size:11px; margin-top:4px; padding:2px 10px; border-radius:10px; display:inline-block; }
+.low { background:#e6f7e6; color:#16a34a; }
+.mid { background:#fef9e7; color:#d97706; }
+.high { background:#feeaea; color:#dc2626; }
+.pass { background:#e6f7e6; color:#16a34a; }
+.warn { background:#fef9e7; color:#d97706; }
+.danger { background:#feeaea; color:#dc2626; }
+.fail { background:#feeaea; color:#dc2626; }
+.caution { background:#fef9e7; color:#d97706; }
+.rate-green { background:#e6f7e6; color:#16a34a; }
+.rate-yellow { background:#fef9e7; color:#d97706; }
+.rate-red { background:#feeaea; color:#dc2626; }
+
+.help-card { background:white; border-radius:12px; padding:20px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.help-card h3 { font-size:15px; margin-bottom:8px; color:#b45309; }
+.help-card p,.help-card li { font-size:13px; color:#555; line-height:1.8; }
+.check-list { list-style:none; padding:0; }
+.check-list li { padding:6px 0; font-size:13px; color:#444; border-bottom:1px solid #f5f5f5; display:flex; align-items:center; gap:8px; }
+.check-list li:last-child { border-bottom:none; }
+.detail-item { padding:12px 16px; border-bottom:1px solid #f5f5f5; display:flex; justify-content:space-between; align-items:center; }
+.detail-item:last-child { border-bottom:none; }
+.detail-item .dlabel { font-size:13px; color:#555; }
+.detail-item .dval { font-size:14px; font-weight:600; }
+.detail-item .dval.pass { color:#16a34a; }
+.detail-item .dval.warn { color:#d97706; }
+.detail-item .dval.danger { color:#dc2626; }
+.result-card { background:white; border-radius:12px; padding:16px; margin-bottom:8px; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.result-card h3 { font-size:14px; color:#b45309; margin-bottom:8px; }
+.result-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #f5f5f5; font-size:13px; }
+.result-row:last-child { border-bottom:none; }
+.result-row .label { color:#555; }
+.result-row .val { font-weight:600; }
+.result-row.total { border-top:2px solid #b45309; padding-top:8px; margin-top:4px; font-weight:700; }
+.result-row.total .val { color:#b45309; font-size:16px; }
+.result-green { color:#16a34a; }
+.result-red { color:#dc2626; }
+.result-orange { color:#d97706; }
+
+.member-banner { background:linear-gradient(135deg,#0f0c29,#302b63,#24243e); border-radius:12px; padding:20px; text-align:center; margin-top:16px; }
+.member-banner h3 { font-size:15px; color:white; margin-bottom:6px; }
+.member-banner p { font-size:12px; color:rgba(255,255,255,0.85); line-height:1.6; }
+.member-banner .btn { display:inline-block; background:white; color:#b45309; padding:8px 24px; border-radius:20px; text-decoration:none; font-size:13px; font-weight:600; margin-top:8px; }
+
+.contact { background:#eef2ff; border-radius:8px; padding:12px; }
+.contact strong { font-size:14px; color:#b45309; }
+.scenario-grid { display:flex; gap:8px; }
+.scenario-btn { flex:1; padding:10px; border-radius:8px; font-size:13px; font-weight:600; border:2px solid #ddd; background:white; color:#888; cursor:pointer; text-align:center; transition:all .2s; }
+.scenario-btn.active { border-color:#3b82f6; color:#b45309; background:#eef2ff; }
+.chart-area { background:white; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06); margin-bottom:16px; text-align:center; }
+.chart-area canvas { max-width:100%; height:auto; }
+.form-row input[type=range] { flex:1; min-width:120px; max-width:250px; accent-color:#3b82f6; }
+.form-row .val { font-size:14px; font-weight:700; color:#b45309; min-width:30px; text-align:right; }
+.form-row .hint { font-size:11px; color:#999; }
+.dim-card .bar-bg { position:absolute; bottom:0; left:0; height:4px; background:#e8ecf1; width:100%; }
+.dim-card .bar-fill { position:absolute; bottom:0; left:0; height:4px; transition:width .5s; }
+
+@media (max-width:480px){.dim-grid{grid-template-columns:1fr 1fr}.result-summary .row{flex-direction:column;gap:4px}}
+
+
+/* ===== 打印/PDF样式 ===== */
+@media print {
+  body { background:white !important; padding:0 !important; margin:0 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .fixed-bottom, .no-print, .marketing, [class*="返回"], footer, .footer, #返回, .return-bar, .bottom-bar { display:none !important; }
+  .header { background:linear-gradient(135deg,#0c1445,#1a3a6b) !important; color:white !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; padding:20px 16px !important; }
+  .card, .dim-card, .check-item, .result-card { break-inside:avoid; page-break-inside:avoid; border:1px solid #ddd !important; box-shadow:none !important; }
+  .score-card, .result-summary { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .tabs { display:none !important; }
+  .panel { display:block !important; padding:10px !important; }
+  .dim-grid { display:grid !important; grid-template-columns:1fr 1fr !important; gap:8px !important; }
+  .form-row { padding:6px 10px !important; }
+  a[href]:after { content:none !important; }
+}
+
+.pdf-btn { background:linear-gradient(135deg,#b8860b,#d4a843) !important; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>👥 社保与个税合规检查</h1>
+  <p>社保基数 · 个税申报 · 人数差异 · 风险预警</p>
+  <div class="badge">您身边的财税专家 · 洪淳宇</div>
+</div>
+<div class="tabs">
+  <div class="tab active" data-tab="input" onclick="st('input')">📝 填数据</div>
+  <div class="tab" data-tab="report" onclick="st('report')">📊 检查报告</div>
+  <div class="tab" data-tab="help" onclick="st('help')">❓ 说明</div>
+</div>
+
+<div class="panel active" id="p-input">
+  <div class="card">
+    <div class="card-title">🏢 企业基础信息</div>
+    <div class="form-row"><label>企业名称</label><input id="f_企业名称" placeholder="选填"></div>
+    <div class="form-row"><label>企业类型</label>
+      <select id="f_企业类型" style="padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;">
+        <option value="一般企业">一般企业</option>
+        <option value="小微企业">小微企业</option>
+        <option value="高新企业">高新技术企业</option>
+        <option value="外资企业">外资企业</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">👤 人员与工资数据</div>
+    <div class="form-row"><label>职工总数</label><input id="f_职工总数" type="number" placeholder="0"><span class="unit">人</span></div>
+    <div class="form-row"><label>参保人数（养老保险）</label><input id="f_参保人数" type="number" placeholder="0"><span class="unit">人</span></div>
+    <div class="form-row"><label>个税申报人数</label><input id="f_个税人数" type="number" placeholder="0"><span class="unit">人</span></div>
+    <div class="form-row"><label>月平均工资总额</label><input id="f_工资总额" type="number" placeholder="0"><span class="unit">元/月</span></div>
+    <div class="form-row"><label>社保申报缴费基数总额</label><input id="f_社保基数" type="number" placeholder="0"><span class="unit">元/月</span></div>
+    <div class="form-row"><label>个税申报工资总额</label><input id="f_个税工资" type="number" placeholder="0"><span class="unit">元/月</span></div>
+    <div class="form-row"><label>当地社保最低缴费基数</label><input id="f_最低基数" type="number" placeholder="0"><span class="unit">元/月</span><span class="unit" style="color:#999;font-size:11px;">参考当地标准</span></div>
+    <div class="form-row"><label>当地社保最高缴费基数</label><input id="f_最高基数" type="number" placeholder="0"><span class="unit">元/月</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚠️ 合规自检项</div>
+    <div class="form-row"><label>是否全员足额缴纳社保</label>
+      <select id="f_全员社保"><option value="0">是，全员足额</option><option value="1" selected>大部分已缴纳，少数未缴</option><option value="2">仅部分员工缴纳</option></select>
+    </div>
+    <div class="form-row"><label>社保基数是否按实际工资申报</label>
+      <select id="f_基数合规"><option value="0">是，按实际工资</option><option value="1" selected>按最低基数缴纳</option><option value="2">基数与工资明显不匹配</option></select>
+    </div>
+    <div class="form-row"><label>个税专项附加扣除是否准确</label>
+      <select id="f_专项扣除"><option value="0">准确填报</option><option value="1" selected>部分员工未填报/填报有误</option><option value="2">大部分未填报或随意填报</option></select>
+    </div>
+    <div class="form-row"><label>个税汇算清缴是否完成</label>
+      <select id="f_汇算"><option value="0">已完成全员汇算</option><option value="1" selected>大部分已完成</option><option value="2">未通知员工进行汇算</option></select>
+    </div>
+    <div class="form-row"><label>外籍/港澳台人员社保缴存</label>
+      <select id="f_外籍"><option value="0">不适用/已按规定缴纳</option><option value="1" selected>有外籍人员但未缴纳社保</option><option value="2">不清楚政策，未处理</option></select>
+    </div>
+    <div class="form-row"><label>实习生/临时工社保处理</label>
+      <select id="f_临时工"><option value="0">已按规定处理</option><option value="1" selected>部分未处理</option><option value="2">未处理，存在风险</option></select>
+    </div>
+  </div>
+
+  <div class="fixed-bottom">
+    <button class="btn-secondary" onclick="resetAll()">清空</button>
+    <button class="btn-primary" onclick="calc()">📊 开始检查</button>
+  </div>
+</div>
+
+<div class="panel" id="p-report">
+  <div id="scoreCard" class="score-card">
+    <div class="label">社保个税合规评分</div>
+    <div class="score">—</div>
+    <div class="grade">请先在「填数据」页录入信息</div>
+    <div class="suggestion"></div>
+  </div>
+  <div id="dimGrid" class="dim-grid"></div>
+  <div class="card">
+    <div class="card-title">📋 检查明细</div>
+    <div id="detailItems"></div>
+  </div>
+  <div class="fixed-bottom">
+    <button class="btn-secondary" onclick="st('input')">← 修改数据</button>
+    <button class="btn-primary" onclick="shareResult()">📤 分享</button>
+  </div>
+</div>
+
+<div class="panel" id="p-help">
+  <div class="help-card"><h3>📋 使用说明</h3>
+    <ol><li>填写人员工资数据</li><li>选择各合规检查项</li><li>查看社保与个税合规评分及风险提示</li></ol>
+  </div>
+  <div class="help-card"><h3>📊 检查维度</h3>
+    <p><strong>人员差异</strong> — 职工总数 vs 参保人数 vs 个税人数差异</p>
+    <p><strong>基数差异</strong> — 工资基数 vs 社保基数 vs 个税基数是否一致</p>
+    <p><strong>合规管理</strong> — 全员缴纳、基数合规、专项扣除、汇算情况等</p>
+  </div>
+  <div class="help-card"><h3>⚠️ 常见稽查风险点</h3>
+    <ul>
+      <li>社保人数<个税人数 → 被要求补缴社保+滞纳金</li>
+      <li>社保基数<实际工资 → 基数稽核风险</li>
+      <li>工资总额长期为0但有个税申报 → 虚构人员风险</li>
+      <li>大量员工按最低基数缴纳 → 重点稽核对象</li>
+    </ul>
+  </div>
+  <div class="help-card"><h3>👤 关于作者</h3>
+    <div class="contact">
+      <strong>洪淳宇 · 您身边的财税专家</strong>
+      <p>专注企业社保合规、个税规划、薪酬税务优化</p>
+      <p style="margin-top:6px;">📞 186-0129-4989 | 💬 hongchunyu042896</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function g(id) { const el=document.getElementById("f_"+id); return el ? parseFloat(el.value)||0 : 0; }
+function gs(id) { const el=document.getElementById("f_"+id); return el ? parseInt(el.value)||0 : 0; }
+
+function calc() {
+  const 职工总数 = g("职工总数"), 参保人数 = g("参保人数"), 个税人数 = g("个税人数");
+  const 工资总额 = g("工资总额"), 社保基数 = g("社保基数"), 个税工资 = g("个税工资");
+  const 最低基数 = g("最低基数"), 最高基数 = g("最高基数");
+
+  // 人员差异
+  let 人差得分 = 10;
+  let 人差问题 = [];
+  if (职工总数 > 0 && 参保人数 > 0) {
+    const diff = 职工总数 - 参保人数;
+    if (diff > 5) { 人差得分 -= 4; 人差问题.push(`参保人数比职工总数少${diff}人，存在漏保风险`); }
+    else if (diff > 0) { 人差得分 -= 2; 人差问题.push(`参保人数比职工总数少${diff}人`); }
+  }
+  if (个税人数 > 0 && 参保人数 > 0) {
+    const diff2 = 个税人数 - 参保人数;
+    if (diff2 > 3) { 人差得分 -= 4; 人差问题.push(`个税申报人数比参保人数多${diff2}人，社保基数不一风险`); }
+    else if (diff2 > 0) { 人差得分 -= 2; }
+  }
+
+  // 基数差异
+  let 基数得分 = 10;
+  let 基数问题 = [];
+  if (工资总额 > 0 && 社保基数 > 0) {
+    const rate = 社保基数 / 工资总额 * 100;
+    if (rate < 60) { 基数得分 -= 4; 基数问题.push(`社保基数仅为工资的${rate.toFixed(0)}%，明显偏低`); }
+    else if (rate < 80) { 基数得分 -= 2; 基数问题.push(`社保基数为工资的${rate.toFixed(0)}%，建议调整`); }
+    else if (rate > 120) { 基数得分 -= 3; 基数问题.push('社保基数高于工资，需检查数据准确性'); }
+  }
+  if (个税工资 > 0 && 社保基数 > 0) {
+    const diff3 = Math.abs(个税工资 - 社保基数) / 个税工资 * 100;
+    if (diff3 > 20) { 基数得分 -= 3; 基数问题.push('个税申报工资与社保基数差异超过20%'); }
+  }
+  if (最低基数 > 0 && 社保基数 > 0 && 职工总数 > 0) {
+    const 人均基数 = 社保基数 / 参保人数;
+    if (人均基数 <= 最低基数) { 基数得分 -= 3; 基数问题.push(`人均社保基数(${Math.round(人均基数)})接近最低基数(${最低基数})，全员按最低缴纳存疑`); }
+  }
+
+  // 合规管理得分
+  const 管理得分 = Math.max(0, 10 - gs("全员社保")*2 - gs("基数合规")*2 - gs("专项扣除") - gs("汇算") - gs("外籍") - gs("临时工"));
+
+  const totalScore = 人差得分 + 基数得分 + 管理得分;
+  const totalMax = 30;
+  const rate = Math.round(totalScore / totalMax * 100);
+
+  let grade, suggestion;
+  if (rate >= 85) { grade = "🟢 合规状况良好"; suggestion = "🎉 社保与个税合规状况良好"; }
+  else if (rate >= 70) { grade = "🟡 基本合规"; suggestion = "📌 部分项目需关注，建议针对性整改"; }
+  else if (rate >= 55) { grade = "🟠 存在风险"; suggestion = "⚠️ 社保个税合规存在风险，建议尽快排查"; }
+  else { grade = "🔴 风险较高"; suggestion = "🚨 合规风险较高，强烈建议进行专业审计"; }
+
+  document.getElementById("scoreCard").innerHTML =
+    `<div class="label">社保个税合规评分</div><div class="score">${totalScore}/${totalMax}</div><div class="grade">${grade}</div><div class="suggestion">${suggestion}</div>`;
+
+  // 维度卡片
+  const dims = [
+    {n:"人员差异",s:人差得分,m:10}, {n:"基数差异",s:基数得分,m:10}, {n:"合规管理",s:管理得分,m:10}
+  ];
+  document.getElementById("dimGrid").innerHTML = dims.map(d => {
+    const p = Math.round(d.s/d.m*100);
+    let c="#16a34a",cl="low";
+    if(p<60){c="#dc2626";cl="high"}else if(p<80){c="#d97706";cl="mid"}
+    return `<div class="dim-card"><div class="name">${d.n}</div><div class="dscore" style="color:${c}">${d.s}</div><div class="dmax">/ ${d.m} 分</div><div class="dstatus ${cl}">${p}%</div></div>`;
+  }).join("");
+
+  // 明细
+  const items = document.getElementById("detailItems");
+  let html = "";
+  const allChecks = [
+    {n:"参保人数 vs 职工总数",s:人差得分>=8?"✓":"⚠",d:人差问题.length?人差问题[0]:"人数基本一致"},
+    {n:"个税人数 vs 参保人数",s:人差得分>=8?"✓":"⚠",d:人差问题.length>1?人差问题[1]:"人数基本一致"},
+    {n:"社保基数 vs 工资基数",s:基数得分>=8?"✓":"⚠",d:基数问题.length?基数问题[0]:"基数匹配正常"},
+    {n:"个税工资 vs 社保基数",s:基数得分>=8?"✓":"⚠",d:基数问题.length>1?基数问题[1]:"差异在正常范围"},
+    {n:"全员社保缴纳",s:gs("全员社保")===0?"✓":gs("全员社保")===1?"⚠":"✗",d:["全员足额","大部分已缴","仅部分缴纳"][gs("全员社保")]},
+    {n:"基数合规性",s:gs("基数合规")===0?"✓":gs("基数合规")===1?"⚠":"✗",d:["按实际工资","按最低基数","明显不匹配"][gs("基数合规")]},
+    {n:"专项附加扣除",s:gs("专项扣除")===0?"✓":gs("专项扣除")===1?"⚠":"✗",d:["准确填报","部分有误","大部分未填"][gs("专项扣除")]},
+    {n:"个税汇算清缴",s:gs("汇算")===0?"✓":gs("汇算")===1?"⚠":"✗",d:["已完成","大部分完成","未通知"][gs("汇算")]},
+  ];
+  allChecks.forEach(c => {
+    const cl = c.s==="✓"?"#16a34a":c.s==="⚠"?"#d97706":"#dc2626";
+    html += `<div style="display:flex;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #f0f0f0;font-size:13px;"><span>${c.n}</span><span style="color:#666">${c.d}</span><span style="color:${cl};font-weight:600">${c.s}</span></div>`;
+  });
+  items.innerHTML = html;
+  st("report");
+}
+
+function st(name) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active",t.dataset.tab===name));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active",p.id==="p-"+name));
+  window.scrollTo(0,0);
+}
+function resetAll() {
+  if(!confirm("确定要清空所有数据吗？")) return;
+  document.querySelectorAll("#p-input select").forEach(el => el.selectedIndex=0);
+  document.querySelectorAll("#p-input input").forEach(el => el.value="");
+}
+function shareResult(){
+  var name=document.getElementById('f_企业名称').value||'未命名企业';
+  var scoreEl=document.getElementById('scoreCard').querySelector('.score');
+  var gradeEl=document.getElementById('scoreCard').querySelector('.grade');
+  var score=scoreEl?scoreEl.textContent:'—';
+  var grade=gradeEl?gradeEl.textContent:'—';
+  var msg='👥 社保与个税合规检查报告\n\n企业名称：'+name+'\n合规评分：'+score+'\n检查结论：'+grade+'\n\n详细检查明细请查看报告详情。\n\n—— 宇守信咨询 · 洪淳宇\n📞 186-0129-4989';
+  if(navigator.share&&navigator.canShare({text:msg})){
+    navigator.share({title:'社保与个税合规检查报告',text:msg});
+  } else {
+    alert('📱 请截屏保存本页面，即可分享给客户！\n\n'+msg);
+  }
+}
+
+function downloadPDF(){
+  window.print();
+}
+</script>
+
+  <div style="text-align:center; padding:16px; margin-top:4px;">
+  <a href="https://sparrow528.github.io/copper-toolbox/" style="display:inline-block; padding:10px 24px; background:#e8eaf6; color:#b45309; border-radius:8px; font-size:13px; font-weight:600; text-decoration:none; border:1px solid #c5cae9;">
+    ← 返回铜级会员入口
+  </a>
+</div>
+</body>
+</html>
